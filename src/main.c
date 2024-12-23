@@ -53,6 +53,8 @@ int main(void) {
         return 0;
     }
 
+    LOG_INF("Starting the blinking loop");
+
     while (1) {
         ret = gpio_pin_toggle_dt(&led);
 
