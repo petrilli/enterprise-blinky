@@ -4,6 +4,12 @@ set(CMAKE_C_STANDARD 23)
 # Add our custom boards to the build environment. This has to be done before pulling in the Zephyr macros
 list(APPEND BOARD_ROOT ../..)
 
+macro(app_set_runner_args)
+    board_runner_args(dfu-util "--dfuse-modifiers=force:mass-erase")
+    board_runner_args(pyocd "--erase")
+    board_runner_args(nrfjprog "--erase")
+endmacro()
+
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(blinky)
 
