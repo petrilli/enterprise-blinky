@@ -15,3 +15,6 @@ different from what you might be used to in the Arduino world:
    [binary descriptors](https://docs.zephyrproject.org/latest/services/binary_descriptors/index.html)
    to embed build information into the binary and then display it when you 
    connect. 
+5. Uses the [non-volatile storage (NVS) subsystem](https://docs.zephyrproject.org/latest/services/storage/nvs/nvs.html)
+   to keep track of the number of reboots between flashes. 
+6. Uses the random number generator to control the blink rate.
