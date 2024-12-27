@@ -1,0 +1,14 @@
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+
+/delete-node/ &storage_partition;
+
+/ {
+    flash0 {
+        partitions {
+            storage_partition: partition@7f000 {
+                label = "storage";
+                reg = <0x0007f000 DT_SIZE_K(4)>;
+            };
+        };
+    };
+};

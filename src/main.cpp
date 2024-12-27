@@ -1,5 +1,5 @@
 /**
- * @file main.c
+ * @file main.cpp
  * @brief A somewhat complicated example of blinking an LED in Zephyr with some logging over a faux USB serial port.
  *
  * A few of the things that are demonstrsated are GPIO, logging, USB, random numbers, and finally NVS storage for a
@@ -13,6 +13,7 @@
 #include <zephyr/drivers/uart.h>
 #include <zephyr/drivers/flash.h>
 #include <zephyr/fs/nvs.h>
+#include <zephyr/input/input.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/random/random.h>
 #include <zephyr/storage/flash_map.h>
@@ -34,6 +35,17 @@ LOG_MODULE_REGISTER(main);
 #define NVS_PARTITION_OFFSET FIXED_PARTITION_OFFSET(NVS_PARTITION)
 #define NVS_DATA_REBOOT_COUNT_ID 1
 
+static void input_cb(struct input_event *event, void *user_data) {
+    LOG_INF("Got input event: %d %d %d", event->type, event->code, event->value);
+}
+
+INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
+
+/**
+ *
+ * @param fs nvs_fs struct to be initialized
+ * @return -1 on error, 0 otherwise
+ */
 int nvs_initialize(struct nvs_fs *fs) {
     struct flash_pages_info page_info; //< Page info for NVS
     int ret;                           //< Default return collector

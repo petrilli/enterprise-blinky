@@ -26,4 +26,4 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-Wl,--as-needed -Wl,--no-copy-dt-needed-entries)
 endif()
 
-target_sources(app PRIVATE src/main.c)
+target_sources(app PRIVATE src/main.cpp)
