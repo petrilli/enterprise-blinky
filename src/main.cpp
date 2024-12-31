@@ -5,7 +5,6 @@
  * A few of the things that are demonstrsated are GPIO, logging, USB, random numbers, and finally NVS storage for a
  * reboot counter.
  */
-#include <stdio.h>
 #include <zephyr/bindesc.h>
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>
@@ -23,9 +22,10 @@
 LOG_MODULE_REGISTER(main);
 
 /// Minimum time to sleep between state changes in milliseconds
-#define BASE_SLEEP_TIME_MS    100
+#define BASE_SLEEP_TIME_MS 100
+
 /// Maximum time to sleep between blinks is BASE_SLEEP_TIME_MS + MAX_SLEEP_TIME_MS
-#define MAX_SLEEP_TIME_MS   1001
+#define MAX_SLEEP_TIME_MS 1001
 
 /// Devicetree identifier alias for the LED to blink
 #define LED0_NODE DT_ALIAS(led0)
@@ -35,8 +35,8 @@ LOG_MODULE_REGISTER(main);
 #define NVS_PARTITION_OFFSET FIXED_PARTITION_OFFSET(NVS_PARTITION)
 #define NVS_DATA_REBOOT_COUNT_ID 1
 
-static void input_cb(struct input_event *event, void *user_data) {
-    LOG_INF("Got input event: %d %d %d", event->type, event->code, event->value);
+static void input_cb([[maybe_unused]] input_event *event, [[maybe_unused]] void *user_data) {
+    LOG_INF("Got input event: %d %d %s", event->type, event->code, (event->value == 1) ? "DOWN" : "UP");
 }
 
 INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
@@ -46,9 +46,9 @@ INPUT_CALLBACK_DEFINE(NULL, input_cb, NULL);
  * @param fs nvs_fs struct to be initialized
  * @return -1 on error, 0 otherwise
  */
-int nvs_initialize(struct nvs_fs *fs) {
-    struct flash_pages_info page_info; //< Page info for NVS
-    int ret;                           //< Default return collector
+int nvs_initialize(nvs_fs *fs) {
+    flash_pages_info page_info = {}; //< Page info for NVS
+    int ret;                                //< Default return collector
 
     /* Define the NFS filesystem */
     fs->flash_device = NVS_PARTITION_DEVICE;
@@ -80,24 +80,24 @@ int nvs_initialize(struct nvs_fs *fs) {
  *
  * @return random delay between 0 and 999
  */
-uint16_t random_delay_get(void) {
-    uint32_t rand_val = sys_rand32_get();
-    return (uint16_t) (rand_val % MAX_SLEEP_TIME_MS) + BASE_SLEEP_TIME_MS;
+uint16_t random_delay_get() {
+    const uint32_t rand_val = sys_rand32_get(); // Const only for this function call
+    return static_cast<uint16_t>(rand_val % MAX_SLEEP_TIME_MS) + BASE_SLEEP_TIME_MS;
 }
 
 int main(void) {
-    int ret;                                                                   //< General return value collector
-    const struct device *const dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_console)); //< UART for the console device
-    uint32_t dtr = 0U;                                                         //< DTR status
-    uint32_t reboot_count = 0U;                                                //< Reboot counter
-    static struct nvs_fs fs;                                                   //< NVS filesystem
-    static const struct gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios); //< Build error w/o LED defined
+    int ret;                                                                //< General return value collector
+    const device *dev = DEVICE_DT_GET(DT_CHOSEN(zephyr_console));     //< UART for the console device
+    uint32_t dtr = 0U;                                                      //< DTR status
+    uint32_t reboot_count = 0U;                                             //< Reboot counter
+    static nvs_fs fs;                                                       //< NVS filesystem
+    static constexpr gpio_dt_spec led = GPIO_DT_SPEC_GET(LED0_NODE, gpios); //< Build error w/o LED defined
 
     /*
      * Initialize the console. Bring up the USB stack, and then wait for a connection, sleeping to give other threads
      * a chance to execute.
      */
-    if (usb_enable(NULL) != 0) {
+    if (usb_enable(nullptr) != 0) {
         return 0;
     }
 
@@ -141,7 +141,7 @@ int main(void) {
 
     LOG_INF("Starting the blinking loop");
 
-    while (1) {
+    while (true) {
         ret = gpio_pin_toggle_dt(&led);
 
         if (ret != 0) {
